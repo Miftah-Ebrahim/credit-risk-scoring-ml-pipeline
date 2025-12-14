@@ -7,7 +7,13 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import roc_auc_score, f1_score
+from sklearn.metrics import (
+    roc_auc_score,
+    f1_score,
+    accuracy_score,
+    precision_score,
+    recall_score,
+)
 
 # Constants
 MODEL_DIR = "models"
@@ -57,12 +63,26 @@ def main():
             # Eval
             preds = grid.best_estimator_.predict(X_test_scaled)
             probs = grid.best_estimator_.predict_proba(X_test_scaled)[:, 1]
+
             auc = roc_auc_score(y_test, probs)
             f1 = f1_score(y_test, preds)
+            acc = accuracy_score(y_test, preds)
+            prec = precision_score(y_test, preds)
+            rec = recall_score(y_test, preds)
 
-            print(f"{name} -> AUC: {auc:.4f}, F1: {f1:.4f}")
+            print(
+                f"{name} -> AUC: {auc:.4f}, F1: {f1:.4f}, Acc: {acc:.4f}, Prec: {prec:.4f}, Rec: {rec:.4f}"
+            )
 
-            mlflow.log_metrics({"auc": auc, "f1": f1})
+            mlflow.log_metrics(
+                {
+                    "auc": auc,
+                    "f1": f1,
+                    "accuracy": acc,
+                    "precision": prec,
+                    "recall": rec,
+                }
+            )
             mlflow.log_params(grid.best_params_)
 
             if auc > best_auc:

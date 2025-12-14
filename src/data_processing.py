@@ -2,7 +2,12 @@ import pandas as pd
 import numpy as np
 import os
 import logging
-from src.features import calculate_rfm, assign_risk_label
+from src.features import (
+    calculate_rfm,
+    assign_risk_label,
+    add_temporal_features,
+    calculate_woe_iv,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -24,6 +29,9 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     # Dedup
     df.drop_duplicates(inplace=True)
 
+    # Add Temporal Features (Verification Fix)
+    df = add_temporal_features(df)
+
     # Impute Numerics
     for col in df.select_dtypes(include=[np.number]).columns:
         if df[col].isnull().any():
@@ -37,14 +45,26 @@ def run_pipeline(raw_path: str, output_path: str = "data/processed/data.csv"):
     logger.info("Loading Data...")
     df = load_data(raw_path)
 
-    logger.info("Cleaning Data...")
+    logger.info("Cleaning Data & Extracting Temporal Features...")
     df = clean_data(df)
 
-    logger.info("Engineering Features...")
+    logger.info("Engineering Features (RFM)...")
     rfm_df = calculate_rfm(df)
 
     logger.info("Creating Proxy Target...")
     final_df = assign_risk_label(rfm_df)
+
+    # WoE/IV Analysis (Verification Fix)
+    # We discretize numerical features into bins to calculate WoE
+    logger.info("Performing WoE/IV Analysis on RFM Features...")
+    for feat in ["Recency", "Frequency", "Monetary_Total"]:
+        try:
+            temp_df = final_df.copy()
+            temp_df[feat + "_Bin"] = pd.qcut(temp_df[feat], q=4, duplicates="drop")
+            iv_res = calculate_woe_iv(temp_df, feat + "_Bin", "Risk_Label")
+            logger.info(f"Feature: {feat} | IV: {iv_res['IV']:.4f}")
+        except Exception as e:
+            logger.warning(f"Could not calculate IV for {feat}: {e}")
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     final_df.to_csv(output_path)
