@@ -19,7 +19,7 @@
 
 ---
 
-## 🚀 Executive Summary
+## Executive Summary
 
 This repository hosts an end-to-end **Machine Learning System** designed to estimate credit risk for Buy-Now-Pay-Later (BNPL) services. By analyzing transactional *Recency, Frequency, and Monetary (RFM)* patterns, we construct a data-driven proxy for creditworthiness, enabling financial inclusion for users without traditional credit histories.
 
@@ -79,7 +79,7 @@ graph LR
 
 ```bash
 .
-├── api/                    # 🚀 The REST API
+├── api/                    #  The REST API
 │   ├── main.py             # FastAPI App
 │   └── schemas.py          # Pydantic Models
 ├── data/                   # 💾 Data Lake
@@ -176,4 +176,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
   <b>Built by Miftah collab  with  AI❤️ future Agentic AI Engineer</b><br>
   <i>Validating trust through code.</i>
 </p>
+
 
