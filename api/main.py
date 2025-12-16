@@ -1,13 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from api.schemas import CustomerData, PredictionResponse
-from src.predict import predict_risk, load_artifacts
+from src.predict import predict_risk, load_model
 
-app = FastAPI(title="Credit Risk API")
+app = FastAPI(title="Credit Risk Engine")
 
 
 @app.on_event("startup")
 def startup():
-    load_artifacts()
+    load_model()
 
 
 @app.get("/health")
